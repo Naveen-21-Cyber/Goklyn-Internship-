@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure Signup Form</title>
+    <link rel="stylesheet" href="style1.css" />
+    <!-- Adding Content Security Policy to prevent XSS attacks -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; form-action 'self';"
+    />
+  </head>
+  <body>
+    <div class="pattern-bg"></div>
+    <div class="container">
+      <div class="form_area">
+        <p class="title">SIGN UP</p>
+        <form id="signupForm" action="/signup" method="POST">
+          <!-- Adding CSRF token for protection -->
+          <input type="hidden" name="csrf_token" id="csrf_token" value="" />
+
+          <div class="form_group">
+            <label class="sub_title" for="name">Name</label>
+            <input
+              placeholder="Enter your full name"
+              class="form_style"
+              type="text"
+              id="name"
+              name="name"
+              pattern="^[A-Za-z\s]{2,50}$"
+              title="Name should only contain letters and spaces, between 2-50 characters"
+              required
+              autocomplete="name"
+            />
+            <span id="nameError" class="error"></span>
+          </div>
+
+          <div class="form_group">
+            <label class="sub_title" for="email">Email</label>
+            <input
+              placeholder="Enter your email"
+              id="email"
+              class="form_style"
+              type="email"
+              name="email"
+              pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+              title="Please enter a valid email address"
+              required
+              autocomplete="email"
+            />
+            <span id="emailError" class="error"></span>
+          </div>
+
+          <div class="form_group">
+            <label class="sub_title" for="password">Password</label>
+            <input
+              placeholder="Enter your password"
+              id="password"
+              class="form_style"
+              type="password"
+              name="password"
+              pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+              title="Password must be at least 8 characters and include uppercase, lowercase, number and special character"
+              required
+              autocomplete="new-password"
+            />
+            <span id="passwordError" class="error"></span>
+          </div>
+
+          <div>
+            <button type="submit" class="btn">SIGN UP</button>
+            <p>
+              Have an Account? <a class="link" href="/home.html">Login Here!</a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- JavaScript for security enhancements -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Generate a CSRF token
+        function generateCSRFToken() {
+          const token =
+            Math.random().toString(36).substring(2, 15) +
+            Math.random().toString(36).substring(2, 15);
+          document.getElementById("csrf_token").value = token;
+          // In a real application, this token would be verified server-side
+        }
+
+        generateCSRFToken();
+
+        // Input sanitization function to prevent XSS
+        function sanitizeInput(input) {
+          return input
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#x27;")
+            .replace(/\//g, "&#x2F;");
+        }
+
+        // Form validation
+        const form = document.getElementById("signupForm");
+
+        form.addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          let isValid = true;
+          const nameInput = document.getElementById("name");
+          const emailInput = document.getElementById("email");
+          const passwordInput = document.getElementById("password");
+
+          // Clear previous error messages
+          document.getElementById("nameError").textContent = "";
+          document.getElementById("emailError").textContent = "";
+          document.getElementById("passwordError").textContent = "";
+
+          // Validate name (only letters and spaces)
+          const namePattern = /^[A-Za-z\s]{2,50}$/;
+          if (!namePattern.test(nameInput.value)) {
+            document.getElementById("nameError").textContent =
+              "Name should only contain letters and spaces, between 2-50 characters";
+            isValid = false;
+          }
+
+          // Validate email
+          const emailPattern =
+            /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          if (!emailPattern.test(emailInput.value)) {
+            document.getElementById("emailError").textContent =
+              "Please enter a valid email address";
+            isValid = false;
+          }
+
+          // Validate password (at least 8 chars, with uppercase, lowercase, number, special char)
+          const passwordPattern =
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+          if (!passwordPattern.test(passwordInput.value)) {
+            document.getElementById("passwordError").textContent =
+              "Password must be at least 8 characters and include uppercase, lowercase, number and special character";
+            isValid = false;
+          }
+
+          if (isValid) {
+            // Sanitize inputs before sending
+            const sanitizedName = sanitizeInput(nameInput.value);
+            const sanitizedEmail = sanitizeInput(emailInput.value);
+
+            // In a real application, you would submit the form here
+            // with the sanitized values
+
+            // For this example, we'll just show that validation passed
+            alert(
+              "Form validation passed! In a real application, this would be securely submitted to the server."
+            );
+
+            // form.submit(); // Uncomment in actual implementation
+          }
+        });
+      });
+    </script>
+
+    <style>
+      .error {
+        color: #de5499;
+        font-size: 12px;
+        margin-top: 5px;
+        display: block;
+      }
+    </style>
+  </body>
+</html>

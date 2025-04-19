@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' https://cdnjs.cloudflare.com"
+    />
+    <title>Secure Login</title>
+    <link rel="stylesheet" href="style1.css" />
+  </head>
+  <body>
+    <div class="pattern-bg"></div>
+
+    <div class="container">
+      <div class="form_area">
+        <p class="title">Login</p>
+        <form action="login.php" method="POST" onsubmit="return validateForm()">
+          <!-- CSRF Protection Token -->
+          <input type="hidden" name="csrf_token" id="csrf_token" value="" />
+
+          <div class="form_group">
+            <label class="sub_title" for="email">Email</label>
+            <input
+              placeholder="Enter your email"
+              id="email"
+              name="email"
+              class="form_style"
+              type="email"
+              required
+              pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+              maxlength="100"
+              autocomplete="email"
+            />
+          </div>
+          <div class="form_group">
+            <label class="sub_title" for="password">Password</label>
+            <input
+              placeholder="Enter your password"
+              id="password"
+              name="password"
+              class="form_style"
+              type="password"
+              required
+              minlength="8"
+              maxlength="64"
+              autocomplete="current-password"
+            />
+          </div>
+          <div>
+            <button type="submit" class="btn">Login</button>
+            <p>
+              Don't have Account?
+              <a class="link" href="login.html">Sign Up Here!</a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // Generate and set CSRF token
+      document.addEventListener("DOMContentLoaded", function () {
+        const csrfToken = generateCSRFToken();
+        document.getElementById("csrf_token").value = csrfToken;
+
+        // Store in session storage for server validation
+        sessionStorage.setItem("csrf_token", csrfToken);
+      });
+
+      // Generate random token
+      function generateCSRFToken() {
+        return Array(32)
+          .fill(0)
+          .map(() => Math.floor(Math.random() * 16).toString(16))
+          .join("");
+      }
+
+      // Client-side form validation
+      function validateForm() {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        let isValid = true;
+
+        // Email validation
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+          alert("Please enter a valid email address");
+          isValid = false;
+        }
+
+        // Password validation
+        if (password.length < 8) {
+          alert("Password must be at least 8 characters long");
+          isValid = false;
+        }
+
+        // Sanitize input (additional protection)
+        if (isValid) {
+          document.getElementById("email").value = sanitizeInput(email);
+        }
+
+        return isValid;
+      }
+
+      // Basic input sanitization
+      function sanitizeInput(input) {
+        return input
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+    </script>
+  </body>
+</html>
